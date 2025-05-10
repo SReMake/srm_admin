@@ -50,7 +50,7 @@
 import { api } from '@/ApiInstance'
 import type { FormInst } from 'naive-ui'
 import { useMessage } from 'naive-ui'
-import { defineComponent, onMounted, ref, type Ref } from 'vue'
+import { defineComponent, inject, onMounted, ref, type Ref } from 'vue'
 import { useAuthStore } from '@/stores/authStore'
 import { useRouter, type Router } from 'vue-router'
 import type { Store } from 'pinia'
@@ -112,6 +112,10 @@ export default defineComponent({
       authStore = useAuthStore()
       router = useRouter()
       handleRefreshCaptcha()
+      const triggerHeader = inject<() => void>('triggerHeader')
+      if (triggerHeader) {
+        triggerHeader()
+      }
     })
     const formRef = ref<FormInst | null>(null)
     const message = useMessage()
