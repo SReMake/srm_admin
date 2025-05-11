@@ -1,5 +1,5 @@
 import { Api } from './__generated'
-
+import { useAuthStore } from './stores/authStore'
 const BASE_URL = window.location.origin
 
 // 导出全局变量`api`
@@ -10,6 +10,7 @@ export const api = new Api(async ({ uri, method, headers, body }) => {
     body: body !== undefined ? JSON.stringify(body) : undefined,
     headers: {
       'content-type': 'application/json;charset=UTF-8',
+      Authorization: `Bearer ${useAuthStore().token}`,
       ...headers,
       ...(tenant !== undefined && tenant !== '' ? { tenant } : {}),
     },

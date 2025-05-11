@@ -1,5 +1,5 @@
 import type {Executor} from '../';
-import type {ResponseResult} from '../model/static/';
+import type {ResponseResult, RoleVo} from '../model/static/';
 
 export class UserRoleController {
     
@@ -26,6 +26,16 @@ export class UserRoleController {
         _uri += encodeURIComponent(options.userId);
         return (await this.executor({uri: _uri, method: 'DELETE', body: options.body})) as Promise<ResponseResult<string>>;
     }
+    
+    /**
+     * 查看当前用户角色
+     */
+    readonly listUserRole: () => Promise<
+        ResponseResult<ReadonlyArray<RoleVo>>
+    > = async() => {
+        let _uri = '/api/v1/userRole';
+        return (await this.executor({uri: _uri, method: 'GET'})) as Promise<ResponseResult<ReadonlyArray<RoleVo>>>;
+    }
 }
 
 export type UserRoleControllerOptions = {
@@ -36,5 +46,6 @@ export type UserRoleControllerOptions = {
     'deleteUserRoles': {
         readonly userId: number, 
         readonly body: ReadonlyArray<number>
-    }
+    }, 
+    'listUserRole': {}
 }
