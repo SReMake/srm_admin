@@ -1,5 +1,5 @@
 {
-  "name": "srm_admin",
+  "name": "srm-admin-front-end",
   "version": "0.0.0",
   "private": true,
   "type": "module",
@@ -14,7 +14,9 @@
     "format": "prettier --write src/"
   },
   "dependencies": {
+    "@tailwindcss/vite": "^4.1.12",
     "pinia": "^3.0.1",
+    "tailwindcss": "^4.1.12",
     "vue": "^3.5.13",
     "vue-router": "^4.5.0"
   },

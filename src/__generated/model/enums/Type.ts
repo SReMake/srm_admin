@@ -1,4 +1,5 @@
 export const Type_CONSTANTS = [
+    'VIEW', 
     'ROUTER', 
     'BUTTON', 
     'MENU'
