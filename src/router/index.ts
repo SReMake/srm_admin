@@ -3,8 +3,14 @@ import HomeView from '../views/HomeView.vue'
 import LoginPage from '../views/LoginView.vue'
 import { useAuthStore } from '@/stores/authStore'
 import { api } from '@/ApiInstance'
+import { h, type Component } from 'vue'
+import { NIcon } from 'naive-ui'
 
 const views = import.meta.glob('../views/**/*.vue')
+
+function renderIcon(icon: Component) {
+  return () => h(NIcon, null, { default: () => h(icon) })
+}
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -31,7 +37,7 @@ router.beforeEach(async (to, from, next) => {
     next('/')
   }
   // 如果是从登入页面到其他页面
-  if ((from.path === '/login' && to.path !== '/login') || (to.path === '/' && from.path === '/')) {
+  if ((from.path === '/login' && to.path !== '/login') || to.path === '/') {
     router.getRoutes().forEach((element) => {
       if (element.name !== 'login' && element.name !== 'home') {
         return router.removeRoute(element.name)
@@ -59,7 +65,7 @@ router.beforeEach(async (to, from, next) => {
     }
   }
   // 判断跳转目标页面是否存在，不存在就重定向到404页面
-  
+
   next()
 })
 export default router

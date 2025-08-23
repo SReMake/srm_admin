@@ -1,3 +1,9 @@
+<template>
+  <div>
+
+  </div>
+</template>
+
 <script lang="ts">
 import { defineComponent, inject, onMounted } from 'vue'
 
@@ -9,10 +15,9 @@ export default defineComponent({
         triggerHeader()
       }
     })
+    return {
+
+    }
   },
 })
 </script>
-
-<template>
-  <main>HOME</main>
-</template>
