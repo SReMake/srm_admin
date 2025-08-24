@@ -1,20 +1,23 @@
 <template>
-  <n-message-provider>
-    <RouterView  />
-  </n-message-provider>
+  <n-config-provider :theme="useThemeStore().theme">
+    <n-message-provider>
+      <RouterView />
+    </n-message-provider>
+  </n-config-provider>
 </template>
 <script lang="ts">
+import { useThemeStore } from '@/stores/theme'
 import { defineComponent, onMounted, onRenderTriggered } from 'vue'
 import { RouterView } from 'vue-router'
 
 export default defineComponent({
   setup() {
-    onRenderTriggered(() => {})
-    onMounted(async () => {
 
-    })
+    onRenderTriggered(() => {})
+    onMounted(async () => {})
     return {
-      RouterView
+      useThemeStore,
+      RouterView,
     }
   },
 })

@@ -1,49 +1,47 @@
 <template>
-  <n-config-provider :theme="theme">
-    <n-message-provider>
-      <n-layout class="h-screen">
-        <n-layout-header>
-          <div class="h-12 flex justify-between">
-            <div class="justify-center flex items-center gap-4 pl-8">
-              <span class="text-2xl font-bold">SRM管理系统</span>
-            </div>
-            <div class="justify-center flex items-center gap-4 pr-4">
-              <n-switch v-model:value="active" size="medium" @update:value="handleChange">
-                <template #icon>
-                  <n-icon>
-                    <DarkTheme24Regular />
-                  </n-icon>
-                </template>
-              </n-switch>
-              <n-dropdown :options="options" @select="handleSelect">
-                <n-avatar
-                  size="medium"
-                  src="https://07akioni.oss-cn-beijing.aliyuncs.com/07akioni.jpeg"
-                />
-              </n-dropdown>
-            </div>
+  <n-message-provider>
+    <n-layout class="h-screen">
+      <n-layout-header>
+        <div class="h-12 flex justify-between">
+          <div class="justify-center flex items-center gap-4 pl-8">
+            <span class="text-2xl font-bold">SRM管理系统</span>
           </div>
-        </n-layout-header>
-        <n-layout class="h-[calc(100%-var(--spacing)*22)]" has-sider>
-          <n-layout-sider class="h-full" content-style="padding: 10px;">
-            <n-menu
-              class="h-full"
-              v-model:value="activeKey"
-              :root-indent="36"
-              :indent="12"
-              :options="menuOptions"
-            />
-          </n-layout-sider>
-          <n-layout-content content-style="padding: 24px;"> <RouterView /> </n-layout-content>
-        </n-layout>
-        <n-layout-footer class="h-10">成府路</n-layout-footer>
+          <div class="justify-center flex items-center gap-4 pr-4">
+            <n-switch v-model:value="active" size="medium" @update:value="handleChange">
+              <template #icon>
+                <n-icon>
+                  <DarkTheme24Regular />
+                </n-icon>
+              </template>
+            </n-switch>
+            <n-dropdown :options="options" @select="handleSelect">
+              <n-avatar
+                size="medium"
+                src="https://07akioni.oss-cn-beijing.aliyuncs.com/07akioni.jpeg"
+              />
+            </n-dropdown>
+          </div>
+        </div>
+      </n-layout-header>
+      <n-layout class="h-[calc(100%-var(--spacing)*22)]" has-sider>
+        <n-layout-sider class="h-full" content-style="padding: 10px;">
+          <n-menu
+            class="h-full"
+            v-model:value="activeKey"
+            :root-indent="36"
+            :indent="12"
+            :options="menuOptions"
+          />
+        </n-layout-sider>
+        <n-layout-content content-style="padding: 24px;"> <RouterView /> </n-layout-content>
       </n-layout>
-    </n-message-provider>
-  </n-config-provider>
+      <n-layout-footer class="h-10">成府路</n-layout-footer>
+    </n-layout>
+  </n-message-provider>
 </template>
 
 <script lang="ts">
-import { defineComponent, onMounted, ref, type Ref } from 'vue'
+import { defineComponent, inject, onMounted, ref, type Ref } from 'vue'
 import { DarkTheme24Regular } from '@vicons/fluent'
 import { RouterView, useRouter, type Router } from 'vue-router'
 import { darkTheme } from 'naive-ui'
@@ -52,9 +50,10 @@ import type { GlobalTheme, MenuOption } from 'naive-ui'
 import type { Store } from 'pinia'
 import { useAuthStore } from '@/stores/authStore'
 import { clearRouteCache } from '@/router'
+import { useThemeStore } from '@/stores/theme'
 const menuOptions = ref<MenuOption[]>([])
 const active = ref(false)
-const theme = ref<GlobalTheme | null>(null)
+
 let router: Router
 let authStore: Store<
   'auth',
@@ -104,7 +103,7 @@ export default defineComponent({
     router = useRouter()
     const handleChange = (changeTheme: boolean) => {
       if (changeTheme) {
-        theme.value = darkTheme
+        useThemeStore().updateTheme(darkTheme)
         const root = document.documentElement
         root.style.setProperty('--color-background', 'var(--vt-c-black)')
         root.style.setProperty('--color-background-soft', 'var(--vt-c-black-soft)')
@@ -117,7 +116,7 @@ export default defineComponent({
         localStorage.setItem('theme', 'dark')
         active.value = true
       } else {
-        theme.value = null
+        useThemeStore().updateTheme(null)
         const root = document.documentElement
         root.style.setProperty('--color-background', 'var(--vt-c-white)')
         root.style.setProperty('--color-background-soft', 'var(--vt-c-white-soft)')
@@ -133,7 +132,6 @@ export default defineComponent({
     }
     return {
       RouterView,
-      theme,
       darkTheme,
       options: [
         {
