@@ -2,11 +2,11 @@
   <n-message-provider>
     <n-layout class="h-screen">
       <n-layout-header>
-        <div class="h-12 flex justify-between">
+        <div class="h-15 flex justify-between border-b">
           <div class="justify-center flex items-center gap-4 pl-8">
             <span class="text-2xl font-bold">SRM管理系统</span>
           </div>
-          <div class="justify-center flex items-center gap-4 pr-4">
+          <div class="justify-center flex items-center gap-4 pr-8">
             <n-switch v-model:value="active" size="medium" @update:value="handleChange">
               <template #icon>
                 <n-icon>
@@ -23,8 +23,8 @@
           </div>
         </div>
       </n-layout-header>
-      <n-layout class="h-[calc(100%-var(--spacing)*22)]" has-sider>
-        <n-layout-sider class="h-full" content-style="padding: 10px;">
+      <n-layout class="h-[calc(100%-var(--spacing)*25)]" has-sider>
+        <n-layout-sider bordered class="h-full" content-style="padding: 10px;">
           <n-menu
             class="h-full"
             v-model:value="activeKey"
@@ -35,7 +35,7 @@
         </n-layout-sider>
         <n-layout-content content-style="padding: 24px;"> <RouterView /> </n-layout-content>
       </n-layout>
-      <n-layout-footer class="h-10">成府路</n-layout-footer>
+      <n-layout-footer class="h-10 w-full"> <div class="items-center text-center leading-10 w-full h-full">SRM管理系统 · Made by <a href="https://github.com/langbiantianya">lbty</a></div></n-layout-footer>
     </n-layout>
   </n-message-provider>
 </template>
