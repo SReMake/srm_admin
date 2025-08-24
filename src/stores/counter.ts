@@ -6,11 +6,9 @@ export const useCounterStore = defineStore('counter', () => {
   const doubleCount = computed(() => count.value * 2)
   // 添加 token 状态
 
-
   function increment() {
     count.value++
   }
-
 
   return { count, doubleCount, increment }
 })

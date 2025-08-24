@@ -3,7 +3,7 @@
     class="flex justify-center items-center h-screen bg-[url('@/assets/login_bg.png')] bg-cover bg-scroll"
   >
     <div
-      class="w-2xl h-3xs flex bg-black/30 shadow-md backdrop-blur-md justify-center items-center"
+      class="w-2xl h-3xs flex bg-white/30 shadow-md backdrop-blur-md justify-center items-center"
     >
       <div class="w-full h-full flex flex-col justify-center items-center">
         <span class="text-2xl font-bold">欢迎使用SRM管理系统</span>
@@ -159,7 +159,7 @@ export default defineComponent({
             if (result.code == 200) {
               authStore.setToken(result.data.token)
               message.success('登录成功')
-              router.replace('/')
+              router.replace('/home')
             } else {
               console.log(result.message)
               message.error(result.message)
