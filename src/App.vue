@@ -6,7 +6,7 @@
   </n-config-provider>
 </template>
 <script lang="ts">
-import { useThemeStore } from '@/stores/theme'
+import { useThemeStore } from '@/stores/themeStore'
 import { defineComponent, onMounted, onRenderTriggered } from 'vue'
 import { RouterView } from 'vue-router'
 

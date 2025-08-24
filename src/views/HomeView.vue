@@ -30,7 +30,7 @@
             v-model:value="activeKey"
             :root-indent="36"
             :indent="12"
-            :options="menuOptions"
+            :options="useMenuStore().menuOptions"
           />
         </n-layout-sider>
         <n-layout-content content-style="padding: 24px;"> <RouterView /> </n-layout-content>
@@ -41,19 +41,17 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, inject, onMounted, ref, type Ref } from 'vue'
+import { defineComponent, onMounted, ref, type Ref } from 'vue'
 import { DarkTheme24Regular } from '@vicons/fluent'
 import { RouterView, useRouter, type Router } from 'vue-router'
 import { darkTheme } from 'naive-ui'
+import { router as rt } from '@/router'
 import { useMenuStore } from '@/stores/menuStore'
-import type { GlobalTheme, MenuOption } from 'naive-ui'
 import type { Store } from 'pinia'
 import { useAuthStore } from '@/stores/authStore'
 import { clearRouteCache } from '@/router'
-import { useThemeStore } from '@/stores/theme'
-const menuOptions = ref<MenuOption[]>([])
+import { useThemeStore } from '@/stores/themeStore'
 const active = ref(false)
-
 let router: Router
 let authStore: Store<
   'auth',
@@ -96,8 +94,6 @@ export default defineComponent({
         handleChange(true)
         active.value = true
       }
-      // const menuStore = useMenuStore()
-      // menuOptions.value = await menuStore.menuOption()
     })
     authStore = useAuthStore()
     router = useRouter()
@@ -129,8 +125,12 @@ export default defineComponent({
         localStorage.setItem('theme', 'light')
         active.value = false
       }
+      console.log(rt.currentRoute.value.path)
     }
+
     return {
+      activeKey: ref<string | null>(null),
+      useMenuStore,
       RouterView,
       darkTheme,
       options: [
@@ -158,8 +158,6 @@ export default defineComponent({
       },
       handleChange,
       active,
-      activeKey: ref<string | null>(null),
-      menuOptions,
     }
   },
 })
