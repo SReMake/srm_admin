@@ -26,8 +26,7 @@
         <n-button size="large" type="primary"> 新增 </n-button>
       </div>
     </div>
-
-    <n-data-table :single-line="false" size="large" :columns="columns" :data="data" :pagination="pagination" />
+    <n-data-table class="min-h-[calc(100%-8rem)] pb-2" :single-line="false" size="large" :columns="columns" :data="data" :pagination="pagination" />
   </div>
 </template>
 <script lang="ts">

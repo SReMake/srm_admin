@@ -1,18 +1,12 @@
 <template>
   <div class="h-full">
     <h1 class="text-2xl font-bold">角色管理</h1>
-    <hr style="margin-bottom: 1rem; margin-top: 0.25rem;">
+    <hr style="margin-bottom: 1rem; margin-top: 0.25rem" />
     <div class="flex justify-between items-center">
       <div>
         <n-form ref="formRef" inline :label-width="80" :model="formValue" size="large">
-          <n-form-item label="姓名" path="user.name">
-            <n-input v-model:value="formValue.user.name" placeholder="输入姓名" />
-          </n-form-item>
-          <n-form-item label="年龄" path="user.age">
-            <n-input v-model:value="formValue.user.age" placeholder="输入年龄" />
-          </n-form-item>
-          <n-form-item label="电话号码" path="phone">
-            <n-input v-model:value="formValue.phone" placeholder="电话号码" />
+          <n-form-item label="角色名称">
+            <n-input v-model:value="formValue.roleName" placeholder="输入姓名" />
           </n-form-item>
           <n-form-item>
             <n-button attr-type="button" type="primary" @click="handleSearchClick"> 搜索 </n-button>
@@ -23,63 +17,64 @@
         </n-form>
       </div>
       <div>
-        <n-button size="large" type="primary"> 新增 </n-button>
+        <n-button size="large" type="info" @click="handleCreateClick"> 新增 </n-button>
       </div>
     </div>
-
-    <n-data-table :single-line="false" size="large" :columns="columns" :data="data" :pagination="pagination" />
+    <n-data-table
+      class="min-h-[calc(100%-8rem)] pb-2"
+      :single-line="false"
+      size="large"
+      :columns="columns"
+      :data="data"
+      :pagination="pagination"
+    />
+    <n-modal style="width: 48rem" v-model:show="showModal" :mask-closable="false" preset="card">
+      <n-form
+        :rules="editRules"
+        ref="editFormRef"
+        inline
+        :label-width="80"
+        :model="editFormValue"
+        size="large"
+      >
+        <n-form-item label="角色名称" path="role">
+          <n-input v-model:value="editFormValue.role" placeholder="角色名称" />
+        </n-form-item>
+      </n-form>
+      <template #footer>
+        <div class="flex gap-4 justify-end">
+          <n-button size="large" type="info"> 提交 </n-button>
+          <n-button size="large"> 取消 </n-button>
+        </div>
+      </template>
+    </n-modal>
   </div>
 </template>
 <script lang="ts">
 import type { DataTableColumns, FormInst } from 'naive-ui'
-import { NButton, NTag, useMessage } from 'naive-ui'
-import { defineComponent, h, reactive, ref } from 'vue'
+import { NButton, useMessage } from 'naive-ui'
+import { defineComponent, h, onMounted, reactive, ref } from 'vue'
+import { api } from '@/ApiInstance'
+
 interface RowData {
-  key: number
-  name: string
-  age: number
-  address: string
-  tags: string[]
+  id: number
+  role: string
 }
 function createColumns({
-  sendMail,
+  editRole,
+  deleteRole,
 }: {
-  sendMail: (rowData: RowData) => void
+  editRole: (rowData: RowData) => void
+  deleteRole: (rowData: RowData) => void
 }): DataTableColumns<RowData> {
   return [
     {
-      title: 'Name',
-      key: 'name',
+      title: 'ID',
+      key: 'id',
     },
     {
-      title: 'Age',
-      key: 'age',
-    },
-    {
-      title: 'Address',
-      key: 'address',
-    },
-    {
-      title: 'Tags',
-      key: 'tags',
-      render(row) {
-        const tags = row.tags.map((tagKey) => {
-          return h(
-            NTag,
-            {
-              style: {
-                marginRight: '6px',
-              },
-              type: 'info',
-              bordered: false,
-            },
-            {
-              default: () => tagKey,
-            },
-          )
-        })
-        return tags
-      },
+      title: '角色名称',
+      key: 'role',
     },
     {
       title: 'Action',
@@ -91,7 +86,7 @@ function createColumns({
             {
               type: 'info',
               size: 'small',
-              onClick: () => sendMail(row),
+              onClick: () => editRole(row),
             },
             { default: () => '编辑' },
           ),
@@ -100,7 +95,7 @@ function createColumns({
             {
               type: 'error',
               size: 'small',
-              onClick: () => sendMail(row),
+              onClick: () => deleteRole(row),
             },
             { default: () => '删除' },
           ),
@@ -110,104 +105,19 @@ function createColumns({
   ]
 }
 
-function createData(): RowData[] {
-  return [
-    {
-      key: 0,
-      name: 'John Brown',
-      age: 32,
-      address: 'New York No. 1 Lake Park',
-      tags: ['nice', 'developer'],
-    },
-    {
-      key: 1,
-      name: 'Jim Green',
-      age: 42,
-      address: 'London No. 1 Lake Park',
-      tags: ['wow'],
-    },
-    {
-      key: 2,
-      name: 'Joe Black',
-      age: 32,
-      address: 'Sidney No. 1 Lake Park',
-      tags: ['cool', 'teacher'],
-    },
-    {
-      key: 3,
-      name: 'John Brown',
-      age: 32,
-      address: 'New York No. 1 Lake Park',
-      tags: ['nice', 'developer'],
-    },
-    {
-      key: 4,
-      name: 'Jim Green',
-      age: 42,
-      address: 'London No. 1 Lake Park',
-      tags: ['wow'],
-    },
-    {
-      key: 5,
-      name: 'Joe Black',
-      age: 32,
-      address: 'Sidney No. 1 Lake Park',
-      tags: ['cool', 'teacher'],
-    },
-    {
-      key: 6,
-      name: 'John Brown',
-      age: 32,
-      address: 'New York No. 1 Lake Park',
-      tags: ['nice', 'developer'],
-    },
-    {
-      key: 7,
-      name: 'Jim Green',
-      age: 42,
-      address: 'London No. 1 Lake Park',
-      tags: ['wow'],
-    },
-    {
-      key: 8,
-      name: 'Joe Black',
-      age: 32,
-      address: 'Sidney No. 1 Lake Park',
-      tags: ['cool', 'teacher'],
-    },
-    {
-      key: 9,
-      name: 'John Brown',
-      age: 32,
-      address: 'New York No. 1 Lake Park',
-      tags: ['nice', 'developer'],
-    },
-    {
-      key: 10,
-      name: 'Jim Green',
-      age: 42,
-      address: 'London No. 1 Lake Park',
-      tags: ['wow'],
-    },
-    {
-      key: 11,
-      name: 'Joe Black',
-      age: 32,
-      address: 'Sidney No. 1 Lake Park',
-      tags: ['cool', 'teacher'],
-    },
-  ]
-}
 export default defineComponent({
   setup() {
+    const showModalRef = ref(false)
+    const data = ref<RowData[]>([])
     const formRef = ref<FormInst | null>(null)
+    const editFormRef = ref<FormInst | null>(null)
     const message = useMessage()
     const formValue = ref({
-      user: {
-        name: '',
-        age: '',
-      },
-      phone: '',
+      roleName: '',
+    })
+    const editFormValue = ref({
+      id: 0,
+      role: '',
     })
     const paginationReactive = reactive({
       page: 1,
@@ -216,37 +126,74 @@ export default defineComponent({
       pageSizes: [5, 10, 20, 25, 50],
       onChange: (page: number) => {
         paginationReactive.page = page
+        listRole(page, paginationReactive.pageSize, formValue.value.roleName)
       },
       onUpdatePageSize: (pageSize: number) => {
         paginationReactive.pageSize = pageSize
         paginationReactive.page = 1
+        listRole(paginationReactive.page, pageSize, formValue.value.roleName)
       },
     })
+    async function listRole(page: number, size: number, roleName: string | undefined) {
+      const res = await api.roleController.listRole({ page, size, role: { name: roleName } })
+      if (res.code == 200) {
+        data.value = res.data.map((item) => {
+          return {
+            id: item.id,
+            role: item.name,
+          }
+        })
+      }
+    }
+    onMounted(async () => {
+      listRole(1, 10, formValue.value.roleName)
+    })
     return {
+      showModal: showModalRef,
       formRef,
       formValue,
+      editFormRef,
+      editFormValue,
+      editRules: {
+        role: {
+          required: true,
+          message: '请输入角色名称',
+          trigger: 'blur',
+        },
+      },
       handleSearchClick(e: MouseEvent) {
         e.preventDefault()
-        console.log(formRef.value)
-        message.info(`send mail to ${JSON.stringify(formValue.value)}`)
+        listRole(
+          paginationReactive.page,
+          paginationReactive.pageSize,
+          formValue.value.roleName?.trim(),
+        )
       },
       handleResetClick(e: MouseEvent) {
         e.preventDefault()
         formValue.value = {
-          user: {
-            name: '',
-            age: '',
-          },
-          phone: '',
+          roleName: '',
         }
+        listRole(
+          paginationReactive.page,
+          paginationReactive.pageSize,
+          formValue.value.roleName?.trim(),
+        )
       },
-      data: createData(),
+      data,
       columns: createColumns({
-        sendMail(rowData) {
-          message.info(`send mail to ${rowData.name}`)
+        editRole(rowData) {
+          message.info(`edir ${rowData.role}`)
+        },
+        deleteRole(rowData) {
+          message.success(`delete to ${rowData.role}`)
         },
       }),
       pagination: paginationReactive,
+      handleCreateClick(e: MouseEvent) {
+        e.preventDefault()
+        showModalRef.value = true
+      },
     }
   },
 })

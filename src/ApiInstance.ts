@@ -10,7 +10,7 @@ export const api = new Api(async ({ uri, method, headers, body }) => {
     body: body !== undefined ? JSON.stringify(body) : undefined,
     headers: {
       'content-type': 'application/json;charset=UTF-8',
-      Authorization: `Bearer ${useAuthStore().token}`,
+      Authorization: useAuthStore().token && `Bearer ${useAuthStore().token}`,
       ...headers,
       ...(tenant !== undefined && tenant !== '' ? { tenant } : {}),
     },
