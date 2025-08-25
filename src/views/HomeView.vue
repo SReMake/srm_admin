@@ -24,9 +24,20 @@
         </div>
       </n-layout-header>
       <n-layout class="h-[calc(100%-var(--spacing)*25-2px)]" has-sider>
-        <n-layout-sider bordered class="h-full" content-style="padding: 10px;">
+        <n-layout-sider
+          :collapsed="collapsed"
+          :collapsed-width="12"
+          show-trigger
+          @collapse="collapsed = true"
+          @expand="collapsed = false"
+          bordered
+          class="h-full"
+          content-style="padding: 10px;"
+        >
           <n-menu
+            :collapsed="collapsed"
             class="h-full"
+            ref="menuInstRef"
             v-model:value="activeKey"
             :root-indent="36"
             :indent="12"
@@ -92,12 +103,14 @@ export default defineComponent({
     DarkTheme24Regular,
   },
   setup() {
+    const menuInstRef = ref<MenuInst | null>(null)
     onMounted(async () => {
       const savedTheme = localStorage.getItem('theme')
       if (savedTheme === 'dark') {
         handleChange(true)
         active.value = true
       }
+      
     })
     authStore = useAuthStore()
     router = useRouter()
@@ -131,8 +144,9 @@ export default defineComponent({
       }
       console.log(rt.currentRoute.value.path)
     }
-
     return {
+      menuInstRef,
+      collapsed: ref(false),
       activeKey: ref<string | null>(null),
       useMenuStore,
       RouterView,

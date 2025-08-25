@@ -1,12 +1,8 @@
 import { defineStore } from 'pinia'
-import { h, ref, type Component, type Ref } from 'vue'
-import { NIcon, type MenuOption } from 'naive-ui' // 根据实际导入路径调整
-import { Home28Regular as HomeIcon } from '@vicons/fluent'
+import { h, ref, type Ref } from 'vue'
+import { type MenuOption } from 'naive-ui' // 根据实际导入路径调整
 import { RouterLink } from 'vue-router'
 
-function renderIcon(icon: Component) {
-  return () => h(NIcon, null, { default: () => h(icon) })
-}
 // 缓存键名
 
 export const useMenuStore = defineStore('menu', () => {
@@ -21,7 +17,6 @@ export const useMenuStore = defineStore('menu', () => {
           { default: () => '资源大盘' },
         ),
       key: 'home',
-      icon: renderIcon(HomeIcon),
     },
   ])
   function addMenu(menu: MenuOption) {
@@ -46,9 +41,8 @@ export const useMenuStore = defineStore('menu', () => {
             { default: () => '资源大盘' },
           ),
         key: 'go-back-home',
-        icon: renderIcon(HomeIcon),
       },
     ]
   }
-  return { menuOptions, addMenu, clearMenu, addMenus, }
+  return { menuOptions, addMenu, clearMenu, addMenus }
 })
