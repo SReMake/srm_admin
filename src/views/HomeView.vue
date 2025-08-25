@@ -1,8 +1,8 @@
 <template>
   <n-message-provider>
     <n-layout class="h-screen">
-      <n-layout-header>
-        <div class="h-15 flex justify-between border-b">
+      <n-layout-header bordered>
+        <div class="h-15 flex justify-between">
           <div class="justify-center flex items-center gap-4 pl-8">
             <span class="text-2xl font-bold">SRM管理系统</span>
           </div>
@@ -23,7 +23,7 @@
           </div>
         </div>
       </n-layout-header>
-      <n-layout class="h-[calc(100%-var(--spacing)*25)]" has-sider>
+      <n-layout class="h-[calc(100%-var(--spacing)*25-2px)]" has-sider>
         <n-layout-sider bordered class="h-full" content-style="padding: 10px;">
           <n-menu
             class="h-full"
@@ -35,7 +35,11 @@
         </n-layout-sider>
         <n-layout-content content-style="padding: 24px;"> <RouterView /> </n-layout-content>
       </n-layout>
-      <n-layout-footer class="h-10 w-full"> <div class="items-center text-center leading-10 w-full h-full">SRM管理系统 · Made by <a href="https://github.com/langbiantianya">lbty</a></div></n-layout-footer>
+      <n-layout-footer bordered class="h-10 w-full">
+        <div class="items-center text-center leading-10 w-full h-full">
+          SRM管理系统 · Made by <a href="https://github.com/langbiantianya">lbty</a>
+        </div></n-layout-footer
+      >
     </n-layout>
   </n-message-provider>
 </template>
