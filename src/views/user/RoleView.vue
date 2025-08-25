@@ -28,7 +28,13 @@
       :data="data"
       :pagination="pagination"
     />
-    <n-modal style="width: 48rem" v-model:show="showModal" :mask-closable="false" preset="card">
+    <n-modal
+      style="width: 48rem"
+      v-model:show="showModal"
+      :on-after-leave="handleCloseEditAfter"
+      :mask-closable="false"
+      preset="card"
+    >
       <n-form
         :rules="editRules"
         ref="editFormRef"
@@ -43,8 +49,17 @@
       </n-form>
       <template #footer>
         <div class="flex gap-4 justify-end">
-          <n-button size="large" type="info"> 提交 </n-button>
-          <n-button size="large"> 取消 </n-button>
+          <n-button
+            size="large"
+            type="info"
+            @click="handleEditSubmit"
+            :disabled="editButtonDisableRef"
+          >
+            提交
+          </n-button>
+          <n-button size="large" @click="handleEditCancel" :disabled="editButtonDisableRef">
+            取消
+          </n-button>
         </div>
       </template>
     </n-modal>
@@ -116,8 +131,8 @@ export default defineComponent({
       roleName: '',
     })
     const editFormValue = ref({
-      id: 0,
-      role: '',
+      id: undefined,
+      role: undefined,
     })
     const paginationReactive = reactive({
       page: 1,
@@ -148,10 +163,12 @@ export default defineComponent({
     onMounted(async () => {
       listRole(1, 10, formValue.value.roleName)
     })
+    const editButtonDisableRef = ref(false)
     return {
       showModal: showModalRef,
       formRef,
       formValue,
+      editButtonDisableRef,
       editFormRef,
       editFormValue,
       editRules: {
@@ -183,16 +200,117 @@ export default defineComponent({
       data,
       columns: createColumns({
         editRole(rowData) {
-          message.info(`edir ${rowData.role}`)
+          editFormValue.value = {
+            id: rowData.id,
+            role: rowData.role,
+          }
+          showModalRef.value = true
         },
         deleteRole(rowData) {
-          message.success(`delete to ${rowData.role}`)
+          api.roleController
+            .deleteRole({ id: rowData.id })
+            .then((res) => {
+              if (res.code == 200) {
+                message.success(`删除${rowData.role}成功`)
+                listRole(
+                  paginationReactive.page,
+                  paginationReactive.pageSize,
+                  formValue.value.roleName?.trim(),
+                )
+              } else {
+                message.error(`删除${rowData.role}失败`)
+              }
+            })
+            .catch((err) => {
+              if (err) {
+                message.error(`删除${rowData.role}失败`)
+              }
+            })
         },
       }),
       pagination: paginationReactive,
       handleCreateClick(e: MouseEvent) {
         e.preventDefault()
         showModalRef.value = true
+      },
+      handleEditSubmit(e: MouseEvent) {
+        editButtonDisableRef.value = true
+        e.preventDefault()
+        formRef.value?.validate((errors) => {
+          if (errors) {
+            return
+          }
+        })
+        if (editFormValue.value.id) {
+          api.roleController
+            .updateRole({
+              id: editFormValue.value.id,
+              body: { name: editFormValue.value.role },
+            })
+            .then((res) => {
+              if (res.code == 200) {
+                message.success(`修改${editFormValue.value.role}成功`)
+              } else {
+                message.error(`修改${editFormValue.value.role}失败`)
+              }
+              showModalRef.value = false
+              editButtonDisableRef.value = false
+              listRole(
+                paginationReactive.page,
+                paginationReactive.pageSize,
+                formValue.value.roleName?.trim(),
+              )
+            })
+            .catch((err) => {
+              if (err) {
+                message.error(`修改${editFormValue.value.role}失败`)
+              }
+              showModalRef.value = false
+              editButtonDisableRef.value = false
+            })
+        } else {
+          api.roleController
+            .addRole({
+              body: {
+                name: editFormValue.value.role,
+              },
+            })
+            .then((res) => {
+              if (res.code == 200) {
+                message.success(`添加${editFormValue.value.role}成功`)
+              } else {
+                message.error(`添加${editFormValue.value.role}失败`)
+              }
+              showModalRef.value = false
+              editButtonDisableRef.value = false
+              listRole(
+                paginationReactive.page,
+                paginationReactive.pageSize,
+                formValue.value.roleName?.trim(),
+              )
+            })
+            .catch((err) => {
+              if (err) {
+                message.error(`添加${editFormValue.value.role}失败`)
+              }
+              showModalRef.value = false
+              editButtonDisableRef.value = false
+            })
+        }
+      },
+      handleEditCancel(e: MouseEvent) {
+        e.preventDefault()
+        editFormValue.value = {
+          id: undefined,
+          role: undefined,
+        }
+        showModalRef.value = false
+      },
+      handleCloseEditAfter() {
+        editFormValue.value = {
+          id: undefined,
+          role: undefined,
+        }
       },
     }
   },
