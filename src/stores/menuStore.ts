@@ -40,7 +40,7 @@ export const useMenuStore = defineStore('menu', () => {
             },
             { default: () => '资源大盘' },
           ),
-        key: 'go-back-home',
+        key: 'home',
       },
     ]
   }

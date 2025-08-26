@@ -59,13 +59,14 @@
 import { defineComponent, onMounted, ref, type Ref } from 'vue'
 import { DarkTheme24Regular } from '@vicons/fluent'
 import { RouterView, useRouter, type Router } from 'vue-router'
-import { darkTheme } from 'naive-ui'
+import { darkTheme, type MenuInst } from 'naive-ui'
 import { router as rt } from '@/router'
 import { useMenuStore } from '@/stores/menuStore'
 import type { Store } from 'pinia'
 import { useAuthStore } from '@/stores/authStore'
 import { clearRouteCache } from '@/router'
 import { useThemeStore } from '@/stores/themeStore'
+import { useRouterStore } from '@/stores/routerStore'
 const active = ref(false)
 let router: Router
 let authStore: Store<
@@ -104,14 +105,7 @@ export default defineComponent({
   },
   setup() {
     const menuInstRef = ref<MenuInst | null>(null)
-    onMounted(async () => {
-      const savedTheme = localStorage.getItem('theme')
-      if (savedTheme === 'dark') {
-        handleChange(true)
-        active.value = true
-      }
-      
-    })
+    const activeKey = ref<string | null>(null)
     authStore = useAuthStore()
     router = useRouter()
     const handleChange = (changeTheme: boolean) => {
@@ -142,12 +136,38 @@ export default defineComponent({
         localStorage.setItem('theme', 'light')
         active.value = false
       }
-      console.log(rt.currentRoute.value.path)
     }
+    const showMenuCallBack = (key: undefined) => {
+      setTimeout(() => {
+        if (menuInstRef.value) {
+          menuInstRef.value.showOption(key)
+        } else {
+          showMenuCallBack(key)
+        }
+      }, 200)
+    }
+    onMounted(async () => {
+      const savedTheme = localStorage.getItem('theme')
+      if (savedTheme === 'dark') {
+        handleChange(true)
+        active.value = true
+      }
+      if (rt.currentRoute.value.path === '/home') {
+        activeKey.value = 'home'
+      } else {
+        useRouterStore().data.forEach((r) => {
+          if (r.path === rt.currentRoute.value.path) {
+            activeKey.value = r.id
+            showMenuCallBack(r.id)
+          }
+        })
+      }
+    })
+
     return {
       menuInstRef,
       collapsed: ref(false),
-      activeKey: ref<string | null>(null),
+      activeKey,
       useMenuStore,
       RouterView,
       darkTheme,
