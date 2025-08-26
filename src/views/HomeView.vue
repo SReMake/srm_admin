@@ -1,201 +1,94 @@
 <template>
-  <n-message-provider>
-    <n-layout class="h-screen">
-      <n-layout-header bordered>
-        <div class="h-15 flex justify-between">
-          <div class="justify-center flex items-center gap-4 pl-8">
-            <span class="text-2xl font-bold">SRM管理系统</span>
-          </div>
-          <div class="justify-center flex items-center gap-4 pr-8">
-            <n-switch v-model:value="active" size="medium" @update:value="handleChange">
-              <template #icon>
-                <n-icon>
-                  <DarkTheme24Regular />
-                </n-icon>
-              </template>
-            </n-switch>
-            <n-dropdown :options="options" @select="handleSelect">
-              <n-avatar
-                size="medium"
-                src="https://07akioni.oss-cn-beijing.aliyuncs.com/07akioni.jpeg"
-              />
-            </n-dropdown>
-          </div>
-        </div>
-      </n-layout-header>
-      <n-layout class="h-[calc(100%-var(--spacing)*25-2px)]" has-sider>
-        <n-layout-sider
-          :collapsed="collapsed"
-          :collapsed-width="12"
-          show-trigger
-          @collapse="collapsed = true"
-          @expand="collapsed = false"
-          bordered
-          class="h-full"
-          content-style="padding: 10px;"
-        >
-          <n-menu
-            :collapsed="collapsed"
-            class="h-full"
-            ref="menuInstRef"
-            v-model:value="activeKey"
-            :root-indent="36"
-            :indent="12"
-            :options="useMenuStore().menuOptions"
-          />
-        </n-layout-sider>
-        <n-layout-content content-style="padding: 24px;"> <RouterView /> </n-layout-content>
-      </n-layout>
-      <n-layout-footer bordered class="h-10 w-full">
-        <div class="items-center text-center leading-10 w-full h-full">
-          SRM管理系统 · Made by <a href="https://github.com/langbiantianya">lbty</a>
-        </div></n-layout-footer
-      >
-    </n-layout>
-  </n-message-provider>
-</template>
-
-<script lang="ts">
-import { defineComponent, onMounted, ref, type Ref } from 'vue'
-import { DarkTheme24Regular } from '@vicons/fluent'
-import { RouterView, useRouter, type Router } from 'vue-router'
-import { darkTheme, type MenuInst } from 'naive-ui'
-import { router as rt } from '@/router'
-import { useMenuStore } from '@/stores/menuStore'
-import type { Store } from 'pinia'
-import { useAuthStore } from '@/stores/authStore'
-import { clearRouteCache } from '@/router'
-import { useThemeStore } from '@/stores/themeStore'
-import { useRouterStore } from '@/stores/routerStore'
-const active = ref(false)
-let router: Router
-let authStore: Store<
-  'auth',
-  Pick<
-    {
-      token: Ref<string | null, string | null>
-      isLogin: Ref<boolean, boolean>
-      setToken: (newToken: string) => void
-      removeToken: () => void
-    },
-    'token' | 'isLogin'
-  >,
-  Pick<
-    {
-      token: Ref<string | null, string | null>
-      isLogin: Ref<boolean, boolean>
-      setToken: (newToken: string) => void
-      removeToken: () => void
-    },
-    never
-  >,
-  Pick<
-    {
-      token: Ref<string | null, string | null>
-      isLogin: Ref<boolean, boolean>
-      setToken: (newToken: string) => void
-      removeToken: () => void
-    },
-    'setToken' | 'removeToken'
+  <div
+    class="h-full flex flex-col items-center justify-center min-h-[300px] p-6 text-center transition-all"
   >
->
+    <div class="text-4xl font-bold mb-4 px-6 py-3 rounded-lg transition-all">
+      {{ greeting }}
+    </div>
+    <div class="text-gray-600 text-lg max-w-md leading-relaxed">
+      {{ additionalMessage }}
+    </div>
+  </div>
+</template>
+<script lang="ts">
+import { computed, defineComponent, onMounted, onUnmounted, ref } from 'vue'
+// 定义时间段类型
+type TimeOfDay = 'morning' | 'noon' | 'afternoon' | 'evening'
+
 export default defineComponent({
-  components: {
-    DarkTheme24Regular,
-  },
   setup() {
-    const menuInstRef = ref<MenuInst | null>(null)
-    const activeKey = ref<string | null>(null)
-    authStore = useAuthStore()
-    router = useRouter()
-    const handleChange = (changeTheme: boolean) => {
-      if (changeTheme) {
-        useThemeStore().updateTheme(darkTheme)
-        const root = document.documentElement
-        root.style.setProperty('--color-background', 'var(--vt-c-black)')
-        root.style.setProperty('--color-background-soft', 'var(--vt-c-black-soft)')
-        root.style.setProperty('--color-background-mute', 'var(--vt-c-black-mute)')
-        root.style.setProperty('--color-border', 'var(--vt-c-divider-dark-2)')
-        root.style.setProperty('--color-border-hover', 'var(--vt-c-divider-dark-1)')
-        root.style.setProperty('--color-heading', 'var(--vt-c-text-dark-1)')
-        root.style.setProperty('--color-text', 'var(--vt-c-text-dark-2)')
-        // 保存深色主题到 localStorage
-        localStorage.setItem('theme', 'dark')
-        active.value = true
-      } else {
-        useThemeStore().updateTheme(null)
-        const root = document.documentElement
-        root.style.setProperty('--color-background', 'var(--vt-c-white)')
-        root.style.setProperty('--color-background-soft', 'var(--vt-c-white-soft)')
-        root.style.setProperty('--color-background-mute', 'var(--vt-c-white-mute)')
-        root.style.setProperty('--color-border', 'var(--vt-c-divider-light-2)')
-        root.style.setProperty('--color-border-hover', 'var(--vt-c-divider-light-1)')
-        root.style.setProperty('--color-heading', 'var(--vt-c-text-light-1)')
-        root.style.setProperty('--color-text', 'var(--vt-c-text-light-2)')
-        // 保存浅色主题到 localStorage
-        localStorage.setItem('theme', 'light')
-        active.value = false
-      }
+    // 响应式变量，带有类型注解
+    const hour = ref<number>(0)
+
+    // 更新时间的函数
+    const updateTime = (): void => {
+      const now = new Date()
+      hour.value = now.getHours()
     }
-    const showMenuCallBack = (key: undefined) => {
-      setTimeout(() => {
-        if (menuInstRef.value) {
-          menuInstRef.value.showOption(key)
-        } else {
-          showMenuCallBack(key)
-        }
-      }, 200)
-    }
-    onMounted(async () => {
-      const savedTheme = localStorage.getItem('theme')
-      if (savedTheme === 'dark') {
-        handleChange(true)
-        active.value = true
-      }
-      if (rt.currentRoute.value.path === '/home') {
-        activeKey.value = 'home'
+
+    // 计算时间段
+    const timeOfDay = computed<TimeOfDay>(() => {
+      if (hour.value >= 5 && hour.value < 10) {
+        return 'morning'
+      } else if (hour.value >= 10 && hour.value < 14) {
+        return 'noon'
+      } else if (hour.value >= 14 && hour.value < 18) {
+        return 'afternoon'
       } else {
-        useRouterStore().data.forEach((r) => {
-          if (r.path === rt.currentRoute.value.path) {
-            activeKey.value = r.id
-            showMenuCallBack(r.id)
-          }
-        })
+        return 'evening'
+      }
+    })
+
+    // 计算问候语
+    const greeting = computed<string>(() => {
+      switch (timeOfDay.value) {
+        case 'morning':
+          return '早上好！'
+        case 'noon':
+          return '中午好！'
+        case 'afternoon':
+          return '下午好！'
+        case 'evening':
+          return '晚上好！'
+      }
+    })
+
+    // 计算附加信息
+    const additionalMessage = computed<string>(() => {
+      switch (timeOfDay.value) {
+        case 'morning':
+          return '新的一天开始了，祝您有个美好的早晨！'
+        case 'noon':
+          return '午餐时间快到了，记得按时吃饭哦！'
+        case 'afternoon':
+          return '下午的时光，继续加油努力！'
+        case 'evening':
+          return '忙碌的一天结束了，好好休息一下吧！'
+      }
+    })
+
+    // 定时器ID，用于清理
+    let timerId: number | null = null
+
+    // 组件挂载时初始化
+    onMounted(() => {
+      updateTime()
+      // 使用window.setInterval确保类型正确
+      timerId = window.setInterval(updateTime, 1000)
+    })
+
+    // 组件卸载时清理
+    onUnmounted(() => {
+      if (timerId) {
+        clearInterval(timerId)
       }
     })
 
     return {
-      menuInstRef,
-      collapsed: ref(false),
-      activeKey,
-      useMenuStore,
-      RouterView,
-      darkTheme,
-      options: [
-        {
-          label: '用户资料',
-          key: 'profile',
-        },
-        {
-          label: '退出登录',
-          key: 'logout',
-        },
-      ],
-      authStore,
-      handleSelect(key: string | number) {
-        switch (key) {
-          case 'profile':
-            console.log('用户资料')
-            break
-          case 'logout':
-            authStore.removeToken()
-            clearRouteCache()
-            router.replace('/login')
-            break
-        }
-      },
-      handleChange,
-      active,
+      hour,
+      greeting,
+      additionalMessage,
+      timeOfDay,
     }
   },
 })

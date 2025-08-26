@@ -14,7 +14,7 @@ export const useMenuStore = defineStore('menu', () => {
           {
             to: '/home',
           },
-          { default: () => '资源大盘' },
+          { default: () => '主页' },
         ),
       key: 'home',
     },
@@ -38,7 +38,7 @@ export const useMenuStore = defineStore('menu', () => {
             {
               to: '/home',
             },
-            { default: () => '资源大盘' },
+            { default: () => '主页' },
           ),
         key: 'home',
       },

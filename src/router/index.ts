@@ -1,4 +1,5 @@
 import { createRouter, createWebHistory, RouterLink } from 'vue-router'
+import MainView from '../views/MainView.vue'
 import HomeView from '../views/HomeView.vue'
 import LoginPage from '../views/LoginView.vue'
 import { useAuthStore } from '@/stores/authStore'
@@ -13,20 +14,23 @@ import { useRouterStore } from '@/stores/routerStore'
 
 const routes = [
   {
-    path: '/',
-    redirect: '/login',
-  },
-  {
     path: '/login',
     name: 'login',
     component: LoginPage,
     meta: { unRequiresAuth: true },
   },
   {
-    path: '/home',
-    name: 'home',
-    component: HomeView,
-    children: [],
+    path: '/',
+    name: 'main',
+    component: MainView,
+    children: [
+      {
+        path: '/home',
+        name: 'home',
+        component: HomeView,
+        children: [],
+      },
+    ],
   },
 ]
 
@@ -35,7 +39,7 @@ const router = createRouter({
   routes,
 })
 function loadDynamicRouter(elements: ResourcesVo[]) {
-  const home = router.getRoutes().filter((item) => item.path === '/home')[0]
+  const home = router.getRoutes().filter((item) => item.path === '/')[0]
   elements.forEach((element) => {
     if (element.type === 'VIEW') {
       const component = views[element.resources]

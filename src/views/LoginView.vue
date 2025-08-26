@@ -5,8 +5,11 @@
     <div
       class="w-2xl h-3xs flex bg-(--color-background)/30 shadow-md backdrop-blur-md justify-center items-center"
     >
-      <div class="w-full h-full flex flex-col justify-center items-center">
+      <div class="w-full gap-8 h-full flex flex-col justify-center items-center">
         <span class="text-2xl font-bold">欢迎使用SRM管理系统</span>
+        <p class="text-gray-600">
+          <a :href="hitokotoLink">{{ hitokotoText }}</a>
+        </p>
       </div>
       <n-form
         class="flex pt-5 flex-col flex-wrap justify-center items-center"
@@ -111,10 +114,22 @@ async function handleLoginRequest() {
 
 export default defineComponent({
   setup() {
+    const hitokotoLink = ref<string>('')
+    const hitokotoText = ref<string>('')
     onMounted(() => {
       authStore = useAuthStore()
       router = useRouter()
       handleRefreshCaptcha()
+      fetch('https://v1.hitokoto.cn?c=a&c=b&c=c&c=d&c=h&c=i&c=j')
+        .then((response) => response.json())
+        .then((data) => {
+          hitokotoLink.value = 'https://hitokoto.cn/?uuid=' + data.uuid
+          hitokotoText.value = '『' + data.hitokoto + '』\t\t————\t\t' + data.from
+          if (data.from_who) {
+            hitokotoText.value += '\t「' + data.from_who + '」'
+          }
+        })
+        .catch(console.error)
     })
     const formRef = ref<FormInst | null>(null)
     const message = useMessage()
@@ -122,6 +137,8 @@ export default defineComponent({
     const bingImageUrl = ref('')
 
     return {
+      hitokotoLink,
+      hitokotoText,
       captchaImage,
       loginFlg,
       formRef,
