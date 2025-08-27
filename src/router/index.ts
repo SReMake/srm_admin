@@ -94,7 +94,7 @@ function convertToMenuStructure(elements: ResourcesVo[]): MenuOption[] {
 
       // 处理子节点：只有Menu类型才使用group包装
       if (children.length > 0) {
-        if (element.type === 'Menu') {
+        if (element.type === 'MENU') {
           // Menu类型：子节点用group包装
           menuNode.children = [
             {
