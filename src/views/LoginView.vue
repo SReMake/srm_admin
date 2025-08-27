@@ -7,8 +7,11 @@
     >
       <div class="w-full gap-8 h-full flex flex-col justify-center items-center">
         <span class="text-2xl font-bold">欢迎使用SRM管理系统</span>
-        <p class="text-gray-600">
-          <a :href="hitokotoLink">{{ hitokotoText }}</a>
+        <p class="text-(--color-text)/80 pl-4">
+          <a :href="hitokotoLink">
+            <p>{{ hitokotoText }}</p>
+            <p class="text-right">{{ hitokotoTextFromWho }}</p>
+          </a>
         </p>
       </div>
       <n-form
@@ -116,17 +119,19 @@ export default defineComponent({
   setup() {
     const hitokotoLink = ref<string>('')
     const hitokotoText = ref<string>('')
+    const hitokotoTextFromWho = ref<string>('')
     onMounted(() => {
       authStore = useAuthStore()
       router = useRouter()
       handleRefreshCaptcha()
-      fetch('https://v1.hitokoto.cn?c=a&c=b&c=c&c=d&c=h&c=i&c=j')
+      fetch('https://v1.hitokoto.cn')
         .then((response) => response.json())
         .then((data) => {
           hitokotoLink.value = 'https://hitokoto.cn/?uuid=' + data.uuid
-          hitokotoText.value = '『' + data.hitokoto + '』\t\t————\t\t' + data.from
+          hitokotoText.value = '『' + data.hitokoto + '』'
+          hitokotoTextFromWho.value = '\t\t————\t\t' + data.from
           if (data.from_who) {
-            hitokotoText.value += '\t「' + data.from_who + '」'
+            hitokotoTextFromWho.value += '\t「' + data.from_who + '」'
           }
         })
         .catch(console.error)
@@ -139,6 +144,7 @@ export default defineComponent({
     return {
       hitokotoLink,
       hitokotoText,
+      hitokotoTextFromWho,
       captchaImage,
       loginFlg,
       formRef,

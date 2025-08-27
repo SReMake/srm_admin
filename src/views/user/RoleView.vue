@@ -6,7 +6,7 @@
       <div>
         <n-form ref="formRef" inline :label-width="80" :model="formValue" size="large">
           <n-form-item label="角色名称">
-            <n-input v-model:value="formValue.roleName" placeholder="输入姓名" />
+            <n-input v-model:value="formValue.roleName" placeholder="输入名称" />
           </n-form-item>
           <n-form-item>
             <n-button attr-type="button" type="primary" @click="handleSearchClick"> 搜索 </n-button>

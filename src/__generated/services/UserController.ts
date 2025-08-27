@@ -54,6 +54,62 @@ export class UserController {
         let _uri = '/api/v1/user/list';
         let _separator = _uri.indexOf('?') === -1 ? '?' : '&';
         let _value: any = undefined;
+        _value = options.params.id;
+        if (_value !== undefined && _value !== null) {
+            _uri += _separator
+            _uri += 'id='
+            _uri += encodeURIComponent(_value);
+            _separator = '&';
+        }
+        _value = options.params.username;
+        if (_value !== undefined && _value !== null) {
+            _uri += _separator
+            _uri += 'username='
+            _uri += encodeURIComponent(_value);
+            _separator = '&';
+        }
+        _value = options.params.phone;
+        if (_value !== undefined && _value !== null) {
+            _uri += _separator
+            _uri += 'phone='
+            _uri += encodeURIComponent(_value);
+            _separator = '&';
+        }
+        _value = options.params.status;
+        if (_value !== undefined && _value !== null) {
+            _uri += _separator
+            _uri += 'status='
+            _uri += encodeURIComponent(_value);
+            _separator = '&';
+        }
+        _value = options.params.createAtStart;
+        if (_value !== undefined && _value !== null) {
+            _uri += _separator
+            _uri += 'createAtStart='
+            _uri += encodeURIComponent(_value);
+            _separator = '&';
+        }
+        _value = options.params.updateAtStart;
+        if (_value !== undefined && _value !== null) {
+            _uri += _separator
+            _uri += 'updateAtStart='
+            _uri += encodeURIComponent(_value);
+            _separator = '&';
+        }
+        _value = options.params.createAtEnd;
+        if (_value !== undefined && _value !== null) {
+            _uri += _separator
+            _uri += 'createAtEnd='
+            _uri += encodeURIComponent(_value);
+            _separator = '&';
+        }
+        _value = options.params.updateAtEnd;
+        if (_value !== undefined && _value !== null) {
+            _uri += _separator
+            _uri += 'updateAtEnd='
+            _uri += encodeURIComponent(_value);
+            _separator = '&';
+        }
         _value = options.page;
         if (_value !== undefined && _value !== null) {
             _uri += _separator
@@ -90,7 +146,7 @@ export type UserControllerOptions = {
     'listUser': {
         readonly page?: number | undefined, 
         readonly size?: number | undefined, 
-        readonly params?: UserSearchInput | undefined
+        readonly params: UserSearchInput
     }, 
     'updateUser': {
         readonly id: number, 
