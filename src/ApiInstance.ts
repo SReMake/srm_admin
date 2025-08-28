@@ -1,6 +1,6 @@
 import { Api } from './__generated'
 import { useAuthStore } from './stores/authStore'
-const BASE_URL = window.location.origin
+const BASE_URL = import.meta.env.VITE_API_BASE_URL || window.location.origin
 
 // 导出全局变量`api`
 export const api = new Api(async ({ uri, method, headers, body }) => {
