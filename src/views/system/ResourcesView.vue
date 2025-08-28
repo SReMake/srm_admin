@@ -13,18 +13,81 @@
         :y="y"
         @select="handleSelect"
         @clickoutside="handleClickoutside"
-      />
-      <div class="w-full">内容</div>
+      ></n-dropdown>
+      <div class="w-full h-full">
+        <n-form
+          class="w-full h-full"
+          ref="formRef"
+          :label-width="80"
+          :model="formValue"
+          :rules="rules"
+          size="large"
+        >
+          <n-form-item label="类型" path="type">
+            <n-select
+              :value="formValue.type"
+              placeholder="选择类型"
+              default-value="MENU"
+              :options="[
+                { label: '菜单', value: 'MENU' },
+                { label: 'VUE视图', value: 'VIEW' },
+                { label: '后端接口', value: 'ROUTER' },
+                { label: '按钮', value: 'BUTTON' },
+              ]"
+              @update:value="handleSelectType"
+            />
+          </n-form-item>
+          <n-form-item label="父节点" path="parentId">
+            <n-tree-select
+              filterable
+              :value="formValue.parentId"
+              placeholder="选择父节点"
+              clearable
+              :options="data"
+              @update:value="handleTreeSelectParent"
+            />
+          </n-form-item>
+          <n-form-item label="名称" path="name">
+            <n-input v-model:value="formValue.name" placeholder="输入名称" />
+          </n-form-item>
+          <n-form-item v-if="!hideResources" label="资源路径" path="resources">
+            <n-input v-model:value="formValue.resources" placeholder="输入资源路径" />
+          </n-form-item>
+          <n-form-item v-if="!hidePath" label="url地址" path="path">
+            <n-input v-model:value="formValue.path" placeholder="输入url地址" />
+          </n-form-item>
+          <n-form-item v-if="!hideAction" label="请求类型" path="action">
+            <n-select
+              v-model:value="formValue.action"
+              placeholder="选择请求类型"
+              default-value="GET"
+              :options="[
+                { label: 'GET', value: 'GET' },
+                { label: 'POST', value: 'POST' },
+                { label: 'PUT', value: 'PUT' },
+                { label: 'DELETE', value: 'DELETE' },
+              ]"
+            />
+          </n-form-item>
+
+          <n-form-item class="w-full">
+            <div class="w-full flex gap-4 justify-end">
+              <n-button attr-type="button" type="info"> 提交 </n-button>
+              <n-button attr-type="button" type="warning"> 取消 </n-button>
+              <n-button v-if="formValue.id" attr-type="button" type="error"> 删除 </n-button>
+            </div>
+          </n-form-item>
+        </n-form>
+      </div>
     </div>
   </div>
 </template>
 <script lang="ts">
 import type { ResourcesVo } from '@/__generated/model/static'
-import type { DropdownOption, TreeOption } from 'naive-ui'
+import type { DropdownOption, FormInst, TreeOption } from 'naive-ui'
 import { useMessage } from 'naive-ui'
 import { defineComponent, onMounted, ref } from 'vue'
 import { api } from '@/ApiInstance'
-
 function createData(
   data: ResourcesVo[],
   parentId: number | null | undefined,
@@ -35,6 +98,7 @@ function createData(
     })
     return child.map((r) => {
       return {
+        ...r,
         key: r.id,
         label: r.name,
         children: createData(data, r.id),
@@ -47,6 +111,7 @@ function createData(
       })
       .map((r) => {
         return {
+          ...r,
           key: r.id,
           label: r.name,
           children: createData(data, r.id),
@@ -59,9 +124,59 @@ export default defineComponent({
     const message = useMessage()
     const data = ref<TreeOption[] | undefined>([])
     const showDropdownRef = ref(false)
-    const optionsRef = ref<DropdownOption[]>([])
+    const optionsRef = ref<DropdownOption[]>([
+      {
+        key: 'CREATE',
+        label: '新增',
+      },
+      {
+        key: 'Edit',
+        label: '编辑',
+      },
+      {
+        key: 'DELETE',
+        label: '删除',
+      },
+    ])
     const xRef = ref(0)
     const yRef = ref(0)
+    const formRef = ref<FormInst | null>(null)
+    const formValue = ref({
+      id: undefined,
+      name: undefined,
+      resources: undefined,
+      path: undefined,
+      action: undefined,
+      type: undefined,
+      parentId: undefined,
+    })
+    const hideResources = ref(true)
+    const hidePath = ref(true)
+    const hideAction = ref(true)
+    const handleSelectType = (value: string | number | Array<string | number> | null) => {
+      switch (value) {
+        case 'MENU':
+          hideResources.value = true
+          hidePath.value = true
+          hideAction.value = true
+          break
+        case 'VIEW':
+          hideResources.value = false
+          hidePath.value = false
+          hideAction.value = true
+          break
+        case 'ROUTER':
+          hideResources.value = false
+          hidePath.value = true
+          hideAction.value = false
+          break
+        case 'BUTTON':
+          hideResources.value = true
+          hidePath.value = false
+          hideAction.value = true
+          break
+      }
+    }
     onMounted(async () => {
       const menuRes = await api.resourcesController.listResources()
       if (menuRes.code == 200) {
@@ -70,24 +185,60 @@ export default defineComponent({
       }
     })
     return {
+      hideResources,
+      hidePath,
+      hideAction,
+      formRef,
+      formValue,
+      rules: {},
       data,
       showDropdown: showDropdownRef,
       x: xRef,
       y: yRef,
       options: optionsRef,
-      handleSelect: () => {
+      handleSelect: (key: 'Edit' | 'DELETE' | 'CREATE') => {
+        message.info(
+          optionsRef.value.filter((op) => {
+            return op.key === key
+          })[0].id,
+        )
         showDropdownRef.value = false
       },
       handleClickoutside: () => {
         showDropdownRef.value = false
       },
       nodeProps: ({ option }: { option: TreeOption }) => {
+        optionsRef.value = [
+          {
+            key: 'CREATE',
+            label: '新增',
+            id: option.key,
+          },
+          {
+            key: 'Edit',
+            label: '编辑',
+            id: option.key,
+          },
+          {
+            key: 'DELETE',
+            label: '删除',
+            id: option.key,
+          },
+        ]
         return {
           onClick() {
-            message.info(`[Click] ${option.key} ${option.label}`)
+            formValue.value = {
+              id: option.id,
+              name: option.name,
+              resources: option.resources,
+              path: option.path,
+              action: option.action,
+              type: option.type,
+              parentId: option.parentId,
+            }
+            handleSelectType(option.type)
           },
           onContextmenu(e: MouseEvent): void {
-            optionsRef.value = [option]
             showDropdownRef.value = true
             xRef.value = e.clientX
             yRef.value = e.clientY
@@ -95,6 +246,10 @@ export default defineComponent({
             e.preventDefault()
           },
         }
+      },
+      handleSelectType,
+      handleTreeSelectParent(value: string | number | Array<string | number> | null) {
+        formValue.value.parentId = value
       },
     }
   },

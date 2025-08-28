@@ -35,7 +35,7 @@
         >
           <n-menu
             :collapsed="collapsed"
-            class="h-full"
+            class="overflow-y-auto"
             ref="menuInstRef"
             v-model:value="activeKey"
             :root-indent="36"
