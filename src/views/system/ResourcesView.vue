@@ -3,17 +3,30 @@
     <h1 class="text-2xl font-bold">资源管理</h1>
     <hr style="margin-bottom: 1rem; margin-top: 0.25rem" />
     <div class="flex justify-between w-full h-full">
-      <n-tree class="w-md h-full" block-line :data="data" :node-props="nodeProps" />
-      <n-dropdown
-        trigger="manual"
-        placement="bottom-start"
-        :show="showDropdown"
-        :options="options as any"
-        :x="x"
-        :y="y"
-        @select="handleSelect"
-        @clickoutside="handleClickoutside"
-      ></n-dropdown>
+      <div class="w-md">
+        <div class="pr-4">
+          <n-input size="small" v-model:value="pattern" placeholder="搜索" />
+        </div>
+        <n-tree
+          class="h-full pr-4 overflow-y-auto"
+          :pattern="pattern"
+          show-irrelevant-nodes
+          block-line
+          :data="data"
+          :node-props="nodeProps"
+        />
+        <n-dropdown
+          trigger="manual"
+          placement="bottom-start"
+          :show="showDropdown"
+          :options="options as any"
+          :x="x"
+          :y="y"
+          @select="handleSelect"
+          @clickoutside="handleClickoutside"
+        ></n-dropdown>
+      </div>
+
       <div class="w-full h-full">
         <n-form
           class="w-full h-full"
@@ -196,35 +209,33 @@ export default defineComponent({
       x: xRef,
       y: yRef,
       options: optionsRef,
-      handleSelect: (key: 'Edit' | 'DELETE' | 'CREATE') => {
-        message.info(
-          optionsRef.value.filter((op) => {
-            return op.key === key
-          })[0].id,
-        )
+      pattern: ref(''),
+      handleSelect: (key: 'Edit' | 'DELETE' | 'CREATE', option: TreeOption) => {
+        console.log(option)
+        switch (key) {
+          case 'Edit':
+            formValue.value = {
+              id: option.id,
+              name: option.name,
+              resources: option.resources,
+              path: option.path,
+              action: option.action,
+              type: option.type,
+              parentId: option.parentId,
+            }
+            handleSelectType(option.type)
+            break
+          case 'DELETE':
+            break
+          case 'CREATE':
+            break
+        }
         showDropdownRef.value = false
       },
       handleClickoutside: () => {
         showDropdownRef.value = false
       },
       nodeProps: ({ option }: { option: TreeOption }) => {
-        optionsRef.value = [
-          {
-            key: 'CREATE',
-            label: '新增',
-            id: option.key,
-          },
-          {
-            key: 'Edit',
-            label: '编辑',
-            id: option.key,
-          },
-          {
-            key: 'DELETE',
-            label: '删除',
-            id: option.key,
-          },
-        ]
         return {
           onClick() {
             formValue.value = {
@@ -239,6 +250,26 @@ export default defineComponent({
             handleSelectType(option.type)
           },
           onContextmenu(e: MouseEvent): void {
+            optionsRef.value = [
+              {
+                ...option,
+                key: 'CREATE',
+                label: '新增',
+                id: option.key,
+              },
+              {
+                ...option,
+                key: 'Edit',
+                label: '编辑',
+                id: option.key,
+              },
+              {
+                ...option,
+                key: 'DELETE',
+                label: '删除',
+                id: option.key,
+              },
+            ]
             showDropdownRef.value = true
             xRef.value = e.clientX
             yRef.value = e.clientY
