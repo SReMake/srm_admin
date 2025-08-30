@@ -50,6 +50,17 @@ export class ResourcesController {
         let _uri = '/api/v1/resources/list';
         return (await this.executor({uri: _uri, method: 'GET'})) as Promise<ResponseResult<ReadonlyArray<ResourcesVo>>>;
     }
+    
+    /**
+     * 修改资源
+     */
+    readonly updateResources: (options: ResourcesControllerOptions['updateResources']) => Promise<
+        ResponseResult<string>
+    > = async(options) => {
+        let _uri = '/api/v1/resources/';
+        _uri += encodeURIComponent(options.id);
+        return (await this.executor({uri: _uri, method: 'PUT', body: options.body})) as Promise<ResponseResult<string>>;
+    }
 }
 
 export type ResourcesControllerOptions = {
@@ -58,6 +69,10 @@ export type ResourcesControllerOptions = {
     }, 
     'deleteResources': {
         readonly id: number
+    }, 
+    'updateResources': {
+        readonly id: number, 
+        readonly body: ResourcesInput
     }, 
     'listResources': {}, 
     'listApis': {}

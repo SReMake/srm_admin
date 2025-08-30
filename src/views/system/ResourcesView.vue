@@ -97,6 +97,7 @@
                 :disabled="editButtonDisable"
                 attr-type="button"
                 type="error"
+                @click="handleDeleteResource(formValue.id)"
               >
                 删除
               </n-button>
@@ -222,6 +223,11 @@ export default defineComponent({
         },
       })
     }
+    const deleteResources = async (id: number) => {
+      return await api.resourcesController.deleteResources({
+        id,
+      })
+    }
     const editButtonDisable = ref(false)
     async function loadTree() {
       const menuRes = await api.resourcesController.listResources()
@@ -300,24 +306,56 @@ export default defineComponent({
       pattern: ref(''),
       submithandle: () => {
         editButtonDisable.value = true
-        formRef.value?.validate((errors) => {
-          if (!errors) {
-            createResources(formValue.value)
-              .then((res) => {
-                if (res.code === 200) {
-                  message.success('保存成功')
-                }
-                loadTree()
-                editButtonDisable.value = false
-              })
-              .catch((err) => {
-                if (err) {
-                  message.error('保存失败')
+        if (formValue.value.id) {
+          api.resourcesController
+            .updateResources({ id: formValue.value.id, body: { ...formValue.value } })
+            .then((res) => {
+              if (res.code === 200) {
+                message.success('修改成功')
+              } else {
+                message.error('修改失败')
+              }
+              loadTree()
+              editButtonDisable.value = false
+            })
+            .catch((err) => {
+              if (err) {
+                message.error('修改失败')
+              }
+              editButtonDisable.value = false
+            })
+        } else {
+          formRef.value?.validate((errors) => {
+            if (!errors) {
+              createResources(formValue.value)
+                .then((res) => {
+                  if (res.code === 200) {
+                    message.success('保存成功')
+                    formValue.value = {
+                      id: null,
+                      name: null,
+                      resources: null,
+                      path: null,
+                      action: null,
+                      type: 'MENU',
+                      parentId: null,
+                    }
+                    handleSelectType('MENU')
+                  } else {
+                    message.error('保存失败')
+                  }
+                  loadTree()
                   editButtonDisable.value = false
-                }
-              })
-          }
-        })
+                })
+                .catch((err) => {
+                  if (err) {
+                    message.error('保存失败')
+                  }
+                  editButtonDisable.value = false
+                })
+            }
+          })
+        }
       },
       handleChangeSelectType(value: string | number | Array<string | number> | null) {
         formValue.value = {
@@ -347,6 +385,32 @@ export default defineComponent({
             handleSelectType(option.type)
             break
           case 'DELETE':
+            deleteResources(option.id)
+              .then((res) => {
+                if (res.code === 200) {
+                  message.success('删除成功')
+                  formValue.value = {
+                    id: null,
+                    name: null,
+                    resources: null,
+                    path: null,
+                    action: null,
+                    type: 'MENU',
+                    parentId: null,
+                  }
+                  handleSelectType('MENU')
+                } else {
+                  message.error('删除失败')
+                }
+                loadTree()
+                editButtonDisable.value = false
+              })
+              .catch((err) => {
+                if (err) {
+                  message.error('删除失败')
+                }
+                editButtonDisable.value = false
+              })
             break
           case 'CREATE':
             formValue.value = {
@@ -412,6 +476,35 @@ export default defineComponent({
       handleSelectType,
       handleTreeSelectParent(value: string | number | Array<string | number> | null) {
         formValue.value.parentId = value
+      },
+      handleDeleteResource(id: number) {
+        editButtonDisable.value = true
+        deleteResources(id)
+          .then((res) => {
+            if (res.code === 200) {
+              message.success('删除成功')
+              formValue.value = {
+                id: null,
+                name: null,
+                resources: null,
+                path: null,
+                action: null,
+                type: 'MENU',
+                parentId: null,
+              }
+              handleSelectType('MENU')
+            } else {
+              message.error('删除失败')
+            }
+            loadTree()
+            editButtonDisable.value = false
+          })
+          .catch((err) => {
+            if (err) {
+              message.error('删除失败')
+            }
+            editButtonDisable.value = false
+          })
       },
     }
   },
