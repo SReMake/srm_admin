@@ -47,7 +47,7 @@
                 { label: '后端接口', value: 'ROUTER' },
                 { label: '按钮', value: 'BUTTON' },
               ]"
-              @update:value="handleSelectType"
+              @update:value="handleChangeSelectType"
             />
           </n-form-item>
           <n-form-item label="父节点" path="parentId">
@@ -73,7 +73,6 @@
             <n-select
               v-model:value="formValue.action"
               placeholder="选择请求类型"
-              default-value="GET"
               :options="[
                 { label: 'GET', value: 'GET' },
                 { label: 'POST', value: 'POST' },
@@ -85,9 +84,22 @@
 
           <n-form-item class="w-full">
             <div class="w-full flex gap-4 justify-end">
-              <n-button attr-type="button" type="info"> 提交 </n-button>
-              <n-button attr-type="button" type="warning"> 取消 </n-button>
-              <n-button v-if="formValue.id" attr-type="button" type="error"> 删除 </n-button>
+              <n-button
+                attr-type="button"
+                type="info"
+                :disabled="editButtonDisable"
+                @click="submithandle"
+              >
+                提交
+              </n-button>
+              <n-button
+                v-if="formValue.id"
+                :disabled="editButtonDisable"
+                attr-type="button"
+                type="error"
+              >
+                删除
+              </n-button>
             </div>
           </n-form-item>
         </n-form>
@@ -97,7 +109,7 @@
 </template>
 <script lang="ts">
 import type { ResourcesVo } from '@/__generated/model/static'
-import type { DropdownOption, FormInst, TreeOption } from 'naive-ui'
+import type { DropdownOption, FormInst, FormItemRule, TreeOption } from 'naive-ui'
 import { useMessage } from 'naive-ui'
 import { defineComponent, onMounted, ref } from 'vue'
 import { api } from '@/ApiInstance'
@@ -160,7 +172,7 @@ export default defineComponent({
       resources: undefined,
       path: undefined,
       action: undefined,
-      type: undefined,
+      type: 'MENU',
       parentId: undefined,
     })
     const hideResources = ref(true)
@@ -172,30 +184,55 @@ export default defineComponent({
           hideResources.value = true
           hidePath.value = true
           hideAction.value = true
+          formValue.value.type = 'MENU'
           break
         case 'VIEW':
           hideResources.value = false
           hidePath.value = false
           hideAction.value = true
+          formValue.value.type = 'VIEW'
           break
         case 'ROUTER':
           hideResources.value = false
           hidePath.value = true
           hideAction.value = false
+          formValue.value.type = 'ROUTER'
           break
         case 'BUTTON':
           hideResources.value = true
           hidePath.value = false
           hideAction.value = true
+          formValue.value.type = 'BUTTON'
           break
       }
     }
-    onMounted(async () => {
+
+    const createResources = async (data: {
+      id: undefined
+      name: undefined
+      resources: undefined
+      path: undefined
+      action: undefined
+      type: undefined
+      parentId: undefined
+    }) => {
+      return await api.resourcesController.addResources({
+        body: {
+          ...data,
+        },
+      })
+    }
+    const editButtonDisable = ref(false)
+    async function loadTree() {
       const menuRes = await api.resourcesController.listResources()
       if (menuRes.code == 200) {
         const rs = JSON.parse(JSON.stringify(menuRes.data))
         data.value = createData(rs, null)
       }
+    }
+
+    onMounted(async () => {
+      loadTree()
     })
     return {
       hideResources,
@@ -203,13 +240,97 @@ export default defineComponent({
       hideAction,
       formRef,
       formValue,
-      rules: {},
+      rules: {
+        name: [
+          {
+            required: true,
+            message: '请输入资源名称',
+            trigger: ['input', 'blur'],
+          },
+        ],
+        resources: [
+          {
+            required: true,
+            message: '请输入资源路径',
+            validator(rule: FormItemRule, value: string) {
+              if (formValue.value.type === 'VIEW' || formValue.value.type === 'ROUTER') {
+                return value || new Error('请输入资源路径')
+              } else {
+                return true
+              }
+            },
+            trigger: ['input', 'blur'],
+          },
+        ],
+        path: [
+          {
+            required: true,
+            message: '请输入url地址',
+            validator(rule: FormItemRule, value: string) {
+              if (formValue.value.type === 'VIEW' || formValue.value.type === 'BUTTON') {
+                return value || new Error('请输入url地址')
+              } else {
+                return true
+              }
+            },
+            trigger: ['input', 'blur'],
+          },
+        ],
+        action: [
+          {
+            required: true,
+            message: '选择请求类型',
+            validator(rule: FormItemRule, value: string) {
+              if (formValue.value.type === 'ROUTER') {
+                return value || new Error('选择请求类型')
+              } else {
+                return true
+              }
+            },
+            trigger: ['input', 'blur'],
+          },
+        ],
+      },
       data,
       showDropdown: showDropdownRef,
       x: xRef,
       y: yRef,
       options: optionsRef,
+      editButtonDisable,
       pattern: ref(''),
+      submithandle: () => {
+        editButtonDisable.value = true
+        formRef.value?.validate((errors) => {
+          if (!errors) {
+            createResources(formValue.value)
+              .then((res) => {
+                if (res.code === 200) {
+                  message.success('保存成功')
+                }
+                loadTree()
+                editButtonDisable.value = false
+              })
+              .catch((err) => {
+                if (err) {
+                  message.error('保存失败')
+                  editButtonDisable.value = false
+                }
+              })
+          }
+        })
+      },
+      handleChangeSelectType(value: string | number | Array<string | number> | null) {
+        formValue.value = {
+          id: undefined,
+          name: null,
+          resources: null,
+          path: null,
+          action: null,
+          type: value,
+          parentId: formValue.value.parentId,
+        }
+        handleSelectType(value)
+      },
       handleSelect: (key: 'Edit' | 'DELETE' | 'CREATE', option: TreeOption) => {
         console.log(option)
         switch (key) {
@@ -228,6 +349,16 @@ export default defineComponent({
           case 'DELETE':
             break
           case 'CREATE':
+            formValue.value = {
+              id: undefined,
+              name: null,
+              resources: null,
+              path: null,
+              action: null,
+              type: 'MENU',
+              parentId: option.id,
+            }
+            handleSelectType('MENU')
             break
         }
         showDropdownRef.value = false
