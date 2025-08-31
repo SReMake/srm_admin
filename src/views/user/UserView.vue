@@ -1,6 +1,6 @@
 <template>
   <div class="h-full">
-    <h1 class="text-2xl font-bold">角色管理</h1>
+    <h1 class="text-2xl font-bold">用户管理</h1>
     <hr style="margin-bottom: 1rem; margin-top: 0.25rem" />
     <div class="flex justify-between items-center">
       <div>
@@ -70,6 +70,7 @@ import type { DataTableColumns, FormInst } from 'naive-ui'
 import { NButton, useMessage } from 'naive-ui'
 import { defineComponent, h, onMounted, reactive, ref } from 'vue'
 import { api } from '@/ApiInstance'
+import { dateFormat, dateTimeOptions } from '@/utils/dateUtils'
 
 interface RowData {
   id: number
@@ -109,6 +110,10 @@ function createColumns({
     {
       title: '状态',
       key: 'status',
+    },
+    {
+      title: '角色',
+      key: 'role',
     },
     { title: '创建者', key: 'createBy' },
     { title: '修改者', key: 'updateBy' },
@@ -192,8 +197,8 @@ export default defineComponent({
             phone: item.phone,
             email: item.email,
             status: item.status,
-            createAt: item.createAt,
-            updateAt: item.updateAt,
+            createAt: item.createAt && dateFormat(new Date(item.createAt), dateTimeOptions),
+            updateAt: item.updateAt && dateFormat(new Date(item.updateAt), dateTimeOptions),
             // createBy: item.createBy.username,
             // updateBy: item.updateBy.username,
           }
@@ -220,7 +225,7 @@ export default defineComponent({
       },
       handleSearchClick(e: MouseEvent) {
         e.preventDefault()
-        console.log(formValue.value);
+        console.log(formValue.value)
 
         listUser(
           paginationReactive.page,
