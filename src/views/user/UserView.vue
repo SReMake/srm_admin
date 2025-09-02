@@ -36,6 +36,7 @@
       preset="card"
     >
       <n-form
+        style="width: 100%"
         :rules="editRules"
         ref="editFormRef"
         inline
@@ -43,9 +44,16 @@
         :model="editFormValue"
         size="large"
       >
-        <n-form-item label="用户名" path="username">
-          <n-input v-model:value="editFormValue.username" placeholder="用户名" />
+        <n-form-item style="width: 100%" label="角色" path="roles">
+          <n-select
+            v-model:value="editFormValue.roles"
+            multiple
+            filterable
+            placeholder="选择角色"
+            :options="roleOptions"
+          />
         </n-form-item>
+        
       </n-form>
       <template #footer>
         <div class="flex gap-4 justify-end">
@@ -156,6 +164,7 @@ function createColumns({
 
 export default defineComponent({
   setup() {
+    const roleOptions = ref([])
     const showModalRef = ref(false)
     const data = ref<RowData[]>([])
     const formRef = ref<FormInst | null>(null)
@@ -166,7 +175,7 @@ export default defineComponent({
     })
     const editFormValue = ref({
       id: undefined,
-      username: undefined,
+      roles: [],
       password: undefined,
       phone: undefined,
       email: undefined,
@@ -206,10 +215,20 @@ export default defineComponent({
       }
     }
     onMounted(async () => {
-      listUser(1, 10, formValue.value.roleName)
+      listUser(1, 10, formValue.value.username)
+      const roleRes = await api.roleController.listRole({ size: 2147483640, role: {} })
+      if (roleRes.code == 200) {
+        roleOptions.value = roleRes.data.map((role) => {
+          return {
+            label: role.name,
+            value: role.id,
+          }
+        })
+      }
     })
     const editButtonDisableRef = ref(false)
     return {
+      roleOptions,
       showModal: showModalRef,
       formRef,
       formValue,
@@ -300,9 +319,9 @@ export default defineComponent({
             })
             .then((res) => {
               if (res.code == 200) {
-                message.success(`修改${editFormValue.value.username}成功`)
+                message.success(`修改成功`)
               } else {
-                message.error(`修改${editFormValue.value.username}失败`)
+                message.error(`修改失败`)
               }
               showModalRef.value = false
               editButtonDisableRef.value = false
@@ -314,7 +333,7 @@ export default defineComponent({
             })
             .catch((err) => {
               if (err) {
-                message.error(`修改${editFormValue.value.username}失败`)
+                message.error(`修改失败`)
               }
               showModalRef.value = false
               editButtonDisableRef.value = false
@@ -328,9 +347,9 @@ export default defineComponent({
             })
             .then((res) => {
               if (res.code == 200) {
-                message.success(`添加${editFormValue.value.username}成功`)
+                message.success(`添加成功`)
               } else {
-                message.error(`添加${editFormValue.value.username}失败`)
+                message.error(`添加失败`)
               }
               showModalRef.value = false
               editButtonDisableRef.value = false
@@ -342,7 +361,7 @@ export default defineComponent({
             })
             .catch((err) => {
               if (err) {
-                message.error(`添加${editFormValue.value.username}失败`)
+                message.error(`添加失败`)
               }
               showModalRef.value = false
               editButtonDisableRef.value = false
